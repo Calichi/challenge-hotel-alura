@@ -1,0 +1,424 @@
+package hotel.alura.views;
+
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
+
+import hotel.alura.App;
+import hotel.alura.controller.HuespedController;
+import hotel.alura.controller.ReservaController;
+import hotel.alura.modelo.Huesped;
+import hotel.alura.modelo.Reserva;
+import hotel.alura.modelo.RowDataProvider;
+
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.persistence.NoResultException;
+import javax.swing.ImageIcon;
+import java.awt.Color;
+import javax.swing.JLabel;
+
+import java.awt.Font;
+import javax.swing.JTabbedPane;
+import java.awt.Toolkit;
+import javax.swing.SwingConstants;
+import javax.swing.JSeparator;
+import javax.swing.ListSelectionModel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.util.List;
+
+@SuppressWarnings("serial")
+public class Busqueda extends JFrame {
+
+	private JPanel contentPane;
+	private JTextField txtBuscar;
+	private JTable tbHuespedes;
+	private JTable tbReservas;
+	private DefaultTableModel modelo;
+	private DefaultTableModel modeloHuesped;
+	private JLabel labelAtras;
+	private JLabel labelExit;
+	private JTabbedPane tpTablas;
+	int xMouse, yMouse;
+
+	private ReservaController reservationController = App.getReservaController();
+	private HuespedController guestController = App.getHuespedController();
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Busqueda frame = new Busqueda();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public Busqueda() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Busqueda.class.getResource("./../imagenes/lupa2.png")));
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 910, 571);
+		contentPane = new JPanel();
+		contentPane.setBackground(Color.WHITE);
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		setLocationRelativeTo(null);
+		setUndecorated(true);
+		
+		txtBuscar = new JTextField();
+		txtBuscar.setBounds(536, 127, 193, 31);
+		txtBuscar.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+		contentPane.add(txtBuscar);
+		txtBuscar.setColumns(10);
+		txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {
+
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent arg0) {
+
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent arg0) {
+				String txt = Busqueda.this.txtBuscar.getText();
+				if(txt != null && !txt.isBlank()) return;
+
+				if(Busqueda.this.reservaEsLaPestañaActiva()) {
+						Busqueda.this.modelo.setRowCount(0);
+						cargarReservas();
+				} else {
+						Busqueda.this.modeloHuesped.setRowCount(0);
+						cargarHuespedes(guestController.listar());
+				}
+
+			}
+
+			
+		});
+		
+		
+		JLabel lblNewLabel_4 = new JLabel("SISTEMA DE BÚSQUEDA");
+		lblNewLabel_4.setForeground(new Color(12, 138, 199));
+		lblNewLabel_4.setFont(new Font("Roboto Black", Font.BOLD, 24));
+		lblNewLabel_4.setBounds(331, 62, 280, 42);
+		contentPane.add(lblNewLabel_4);
+		
+		tpTablas = new JTabbedPane(JTabbedPane.TOP);
+		tpTablas.setBackground(new Color(12, 138, 199));
+		tpTablas.setFont(new Font("Roboto", Font.PLAIN, 16));
+		tpTablas.setBounds(20, 169, 865, 328);
+		contentPane.add(tpTablas);
+		
+		tbReservas = new JTable();
+		tbReservas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tbReservas.setFont(new Font("Roboto", Font.PLAIN, 16));
+		modelo = (DefaultTableModel) tbReservas.getModel();
+		modelo.addColumn("Numero de Reserva");
+		modelo.addColumn("Fecha Check In");
+		modelo.addColumn("Fecha Check Out");
+		modelo.addColumn("Valor");
+		modelo.addColumn("Forma de Pago");
+		cargarReservas();
+		JScrollPane scroll_table = new JScrollPane(tbReservas);
+		tpTablas.addTab(Reserva.TITULO, new ImageIcon(Busqueda.class.getResource("./../imagenes/reservado.png")), scroll_table, null);
+		scroll_table.setVisible(true);
+		
+		tbHuespedes = new JTable();
+		tbHuespedes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tbHuespedes.setFont(new Font("Roboto", Font.PLAIN, 16));
+		modeloHuesped = (DefaultTableModel) tbHuespedes.getModel();
+		modeloHuesped.addColumn("Número de Huesped");
+		modeloHuesped.addColumn("Nombre");
+		modeloHuesped.addColumn("Apellido");
+		modeloHuesped.addColumn("Fecha de Nacimiento");
+		modeloHuesped.addColumn("Nacionalidad");
+		modeloHuesped.addColumn("Telefono");
+		modeloHuesped.addColumn("Número de Reserva");
+		cargarHuespedes(guestController.listar());
+		JScrollPane scroll_tableHuespedes = new JScrollPane(tbHuespedes);
+		tpTablas.addTab(Huesped.TITULO, new ImageIcon(Busqueda.class.getResource("./../imagenes/pessoas.png")), scroll_tableHuespedes, null);
+		scroll_tableHuespedes.setVisible(true);
+		
+		JLabel lblNewLabel_2 = new JLabel("");
+		lblNewLabel_2.setIcon(new ImageIcon(Busqueda.class.getResource("./../imagenes/Ha-100px.png")));
+		lblNewLabel_2.setBounds(56, 51, 104, 107);
+		contentPane.add(lblNewLabel_2);
+		
+		JPanel header = new JPanel();
+		header.addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				headerMouseDragged(e);
+				
+			}
+		});
+		header.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				headerMousePressed(e);
+			}
+		});
+		header.setLayout(null);
+		header.setBackground(Color.WHITE);
+		header.setBounds(0, 0, 910, 36);
+		contentPane.add(header);
+		
+		JPanel btnAtras = new JPanel();
+		btnAtras.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				MenuUsuario usuario = new MenuUsuario();
+				usuario.setVisible(true);
+				dispose();				
+			}
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				btnAtras.setBackground(new Color(12, 138, 199));
+				labelAtras.setForeground(Color.white);
+			}			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				 btnAtras.setBackground(Color.white);
+			     labelAtras.setForeground(Color.black);
+					}
+		});
+		btnAtras.setLayout(null);
+		btnAtras.setBackground(Color.WHITE);
+		btnAtras.setBounds(0, 0, 53, 36);
+		header.add(btnAtras);
+		
+		labelAtras = new JLabel("<");
+		labelAtras.setHorizontalAlignment(SwingConstants.CENTER);
+		labelAtras.setFont(new Font("Roboto", Font.PLAIN, 23));
+		labelAtras.setBounds(0, 0, 53, 36);
+		btnAtras.add(labelAtras);
+		
+		JPanel btnexit = new JPanel();
+		btnexit.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				MenuUsuario usuario = new MenuUsuario();
+				usuario.setVisible(true);
+				dispose();
+			}
+			@Override
+			public void mouseEntered(MouseEvent e) { //Al usuario pasar el mouse por el botón este cambiará de color
+				btnexit.setBackground(Color.red);
+				labelExit.setForeground(Color.white);
+			}			
+			@Override
+			public void mouseExited(MouseEvent e) { //Al usuario quitar el mouse por el botón este volverá al estado original
+				 btnexit.setBackground(Color.white);
+				 labelExit.setForeground(Color.black);
+				}
+			});
+			btnexit.setLayout(null);
+			btnexit.setBackground(Color.WHITE);
+			btnexit.setBounds(857, 0, 53, 36);
+			header.add(btnexit);
+			
+			labelExit = new JLabel("X");
+		labelExit.setHorizontalAlignment(SwingConstants.CENTER);
+		labelExit.setForeground(Color.BLACK);
+		labelExit.setFont(new Font("Roboto", Font.PLAIN, 18));
+		labelExit.setBounds(0, 0, 53, 36);
+		btnexit.add(labelExit);
+		
+		JSeparator separator_1_2 = new JSeparator();
+		separator_1_2.setForeground(new Color(12, 138, 199));
+		separator_1_2.setBackground(new Color(12, 138, 199));
+		separator_1_2.setBounds(539, 159, 193, 2);
+		contentPane.add(separator_1_2);
+		
+		JPanel btnbuscar = new JPanel();
+		btnbuscar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(Busqueda.this.obtenerTituloDeLaPestañaActiva() == Reserva.TITULO) {
+					try {//Prevenir el procesamiento de un valor invalido
+						Long reservaId = Long.parseLong(Busqueda.this.txtBuscar.getText());
+						try {//Informar busqueda fallida
+							Reserva reserva = Busqueda.this.reservationController.findBy(reservaId);
+							Busqueda.this.modelo.setRowCount(0);
+							Busqueda.this.cargarReserva(reserva);
+						} catch(NoResultException ex) {
+							Comunicador.informarReservaNoEncontrada(Busqueda.this);
+						}
+					} catch(NumberFormatException ex) {
+						Comunicador.informarNumeroInvalido(Busqueda.this);
+					}
+				} else {
+					String apellido = Busqueda.this.txtBuscar.getText();
+					List<Huesped> huespedes = guestController.buscarPorApellido(apellido);
+					Busqueda.this.modeloHuesped.setRowCount(0);
+					Busqueda.this.cargarHuespedes(huespedes);
+				}
+			}
+		});
+		btnbuscar.setLayout(null);
+		btnbuscar.setBackground(new Color(12, 138, 199));
+		btnbuscar.setBounds(748, 125, 122, 35);
+		btnbuscar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+		contentPane.add(btnbuscar);
+		
+		JLabel lblBuscar = new JLabel("BUSCAR");
+		lblBuscar.setBounds(0, 0, 122, 35);
+		btnbuscar.add(lblBuscar);
+		lblBuscar.setHorizontalAlignment(SwingConstants.CENTER);
+		lblBuscar.setForeground(Color.WHITE);
+		lblBuscar.setFont(new Font("Roboto", Font.PLAIN, 18));
+		
+		JPanel btnEditar = new JPanel();
+		btnEditar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent args) {
+				App.iniciarTransaccion();
+				if(Busqueda.this.reservaEsLaPestañaActiva()) {
+					Busqueda.this.reservationController.updateFromTable(tbReservas);
+				} else {
+					Busqueda.this.guestController.updateFromTable(tbHuespedes);
+				}
+				App.confirmarTransaccion();
+				Comunicador.informarModificacionExitosa(Busqueda.this);
+			}
+		});
+		btnEditar.setLayout(null);
+		btnEditar.setBackground(new Color(12, 138, 199));
+		btnEditar.setBounds(635, 508, 122, 35);
+		btnEditar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+		contentPane.add(btnEditar);
+		
+		JLabel lblEditar = new JLabel("EDITAR");
+		lblEditar.setHorizontalAlignment(SwingConstants.CENTER);
+		lblEditar.setForeground(Color.WHITE);
+		lblEditar.setFont(new Font("Roboto", Font.PLAIN, 18));
+		lblEditar.setBounds(0, 0, 122, 35);
+		btnEditar.add(lblEditar);
+		
+		JPanel btnEliminar = new JPanel();
+		btnEliminar.setLayout(null);
+		btnEliminar.setBackground(new Color(12, 138, 199));
+		btnEliminar.setBounds(767, 508, 122, 35);
+		btnEliminar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+		contentPane.add(btnEliminar);
+
+		btnEliminar.addMouseListener(new MouseAdapter() {//All Good
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				App.iniciarTransaccion();
+
+				Reserva reservation = null;
+				Huesped guest = null;
+
+				if(Busqueda.this.reservaEsLaPestañaActiva()) {
+					reservation = Busqueda.this.reservationController.findIn(tbReservas);
+					guest = Busqueda.this.guestController.findBy(reservation);
+				} else {
+					guest = Busqueda.this.guestController.findIn(tbHuespedes);
+					reservation = guest.getReserva();
+				}
+
+				guest.setReserva(null);//Deshasociar la reserva del huesped
+
+				//Eliminar de la base de datos la reserva y el huesped
+				Busqueda.this.reservationController.remover(reservation);
+				Busqueda.this.guestController.remover(guest);
+
+				//Actualizar la interfaz de la tabla
+				Busqueda.this.modelo.setRowCount(0);
+				Busqueda.this.modeloHuesped.setRowCount(0);
+				Busqueda.this.cargarHuespedes();
+				Busqueda.this.cargarReservas();
+
+				App.confirmarTransaccion();
+
+				//Informar de la eliminación del registro
+				Comunicador.informarEliminacionExistosa(Busqueda.this);
+			}
+		});
+		
+		JLabel lblEliminar = new JLabel("ELIMINAR");
+		lblEliminar.setHorizontalAlignment(SwingConstants.CENTER);
+		lblEliminar.setForeground(Color.WHITE);
+		lblEliminar.setFont(new Font("Roboto", Font.PLAIN, 18));
+		lblEliminar.setBounds(0, 0, 122, 35);
+		btnEliminar.add(lblEliminar);
+		setResizable(false);
+	}
+	
+//Código que permite mover la ventana por la pantalla según la posición de "x" y "y"
+	private void headerMousePressed(java.awt.event.MouseEvent evt) {
+		xMouse = evt.getX();
+		yMouse = evt.getY();
+	}
+	
+	private void headerMouseDragged(java.awt.event.MouseEvent evt) {
+		int x = evt.getXOnScreen();
+	  int y = evt.getYOnScreen();
+	  this.setLocation(x - xMouse, y - yMouse);
+	}
+
+	private void insertRow(DefaultTableModel model, RowDataProvider data) {
+		model.addRow(data.toArray());
+	}
+	
+	private void insertRows(DefaultTableModel model, List<RowDataProvider> dataList) {
+		dataList.forEach(data -> {
+			insertRow(model, data);
+		});
+	}
+	
+	private void cargarReserva(Reserva reserva) {
+		insertRow(modelo, reserva);
+	}
+	
+	/*private void cargarHuesped(Huesped huesped) {
+		insertRow(modeloHuesped, huesped);
+	}*/
+	
+	private void cargarReservas(List<Reserva> reservas) {
+		insertRows(modelo, RowDataProvider.from(reservas));
+	}
+	
+	private void cargarHuespedes(List<Huesped> huespedes) {
+		insertRows(modeloHuesped, RowDataProvider.from(huespedes));
+	}
+
+	private void cargarReservas() {
+		cargarReservas(reservationController.listar());
+	}
+
+	private void cargarHuespedes() {
+		cargarHuespedes(guestController.listar());
+	}
+	
+	private String obtenerTituloDeLaPestañaActiva() {
+		return this.tpTablas.getTitleAt(this.tpTablas.getSelectedIndex());
+	}
+
+	private boolean reservaEsLaPestañaActiva() {
+		return this.obtenerTituloDeLaPestañaActiva() == Reserva.TITULO;
+	}
+
+}
