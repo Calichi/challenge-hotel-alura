@@ -19,6 +19,8 @@ import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import hotel.alura.views.busqueda.View;
+
 @SuppressWarnings("serial")
 public class MenuUsuario extends JFrame {
 
@@ -126,7 +128,7 @@ public class MenuUsuario extends JFrame {
 			}
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				Busqueda busqueda = new Busqueda();
+				View busqueda = new View();
 				busqueda.setVisible(true);
 				dispose();
 			}

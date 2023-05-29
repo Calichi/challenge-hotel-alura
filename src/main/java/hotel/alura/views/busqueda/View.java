@@ -1,4 +1,4 @@
-package hotel.alura.views;
+package hotel.alura.views.busqueda;
 
 import java.awt.EventQueue;
 import javax.swing.JFrame;
@@ -15,6 +15,9 @@ import hotel.alura.controller.ReservaController;
 import hotel.alura.modelo.Huesped;
 import hotel.alura.modelo.Reserva;
 import hotel.alura.modelo.RowDataProvider;
+import hotel.alura.views.Comunicador;
+import hotel.alura.views.MenuUsuario;
+import hotel.alura.views.busqueda.components.GuestsTable;
 
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -35,7 +38,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class Busqueda extends JFrame {
+public class View extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField txtBuscar;
@@ -58,7 +61,7 @@ public class Busqueda extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Busqueda frame = new Busqueda();
+					View frame = new View();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -70,8 +73,8 @@ public class Busqueda extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public Busqueda() {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Busqueda.class.getResource("./../imagenes/lupa2.png")));
+	public View() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(View.class.getResource("./../../imagenes/lupa2.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 910, 571);
 		contentPane = new JPanel();
@@ -101,14 +104,14 @@ public class Busqueda extends JFrame {
 
 			@Override
 			public void removeUpdate(DocumentEvent arg0) {
-				String txt = Busqueda.this.txtBuscar.getText();
+				String txt = View.this.txtBuscar.getText();
 				if(txt != null && !txt.isBlank()) return;
 
-				if(Busqueda.this.reservaEsLaPestañaActiva()) {
-						Busqueda.this.modelo.setRowCount(0);
+				if(View.this.reservaEsLaPestañaActiva()) {
+						View.this.modelo.setRowCount(0);
 						cargarReservas();
 				} else {
-						Busqueda.this.modeloHuesped.setRowCount(0);
+						View.this.modeloHuesped.setRowCount(0);
 						cargarHuespedes(guestController.listar());
 				}
 
@@ -141,27 +144,27 @@ public class Busqueda extends JFrame {
 		modelo.addColumn("Forma de Pago");
 		cargarReservas();
 		JScrollPane scroll_table = new JScrollPane(tbReservas);
-		tpTablas.addTab(Reserva.TITULO, new ImageIcon(Busqueda.class.getResource("./../imagenes/reservado.png")), scroll_table, null);
+		tpTablas.addTab(Reserva.TITULO, new ImageIcon(View.class.getResource("./../../imagenes/reservado.png")), scroll_table, null);
 		scroll_table.setVisible(true);
 		
-		tbHuespedes = new JTable();
-		tbHuespedes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tbHuespedes.setFont(new Font("Roboto", Font.PLAIN, 16));
+		tbHuespedes = new GuestsTable();
 		modeloHuesped = (DefaultTableModel) tbHuespedes.getModel();
-		modeloHuesped.addColumn("Número de Huesped");
+		/*tbHuespedes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tbHuespedes.setFont(new Font("Roboto", Font.PLAIN, 16));*/
+		/*modeloHuesped.addColumn("Número de Huesped");
 		modeloHuesped.addColumn("Nombre");
 		modeloHuesped.addColumn("Apellido");
 		modeloHuesped.addColumn("Fecha de Nacimiento");
 		modeloHuesped.addColumn("Nacionalidad");
 		modeloHuesped.addColumn("Telefono");
-		modeloHuesped.addColumn("Número de Reserva");
+		modeloHuesped.addColumn("Número de Reserva");*/
 		cargarHuespedes(guestController.listar());
 		JScrollPane scroll_tableHuespedes = new JScrollPane(tbHuespedes);
-		tpTablas.addTab(Huesped.TITULO, new ImageIcon(Busqueda.class.getResource("./../imagenes/pessoas.png")), scroll_tableHuespedes, null);
+		tpTablas.addTab(Huesped.TITULO, new ImageIcon(View.class.getResource("./../../imagenes/pessoas.png")), scroll_tableHuespedes, null);
 		scroll_tableHuespedes.setVisible(true);
 		
 		JLabel lblNewLabel_2 = new JLabel("");
-		lblNewLabel_2.setIcon(new ImageIcon(Busqueda.class.getResource("./../imagenes/Ha-100px.png")));
+		lblNewLabel_2.setIcon(new ImageIcon(View.class.getResource("./../../imagenes/Ha-100px.png")));
 		lblNewLabel_2.setBounds(56, 51, 104, 107);
 		contentPane.add(lblNewLabel_2);
 		
@@ -255,24 +258,24 @@ public class Busqueda extends JFrame {
 		btnbuscar.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(Busqueda.this.obtenerTituloDeLaPestañaActiva() == Reserva.TITULO) {
+				if(View.this.obtenerTituloDeLaPestañaActiva() == Reserva.TITULO) {
 					try {//Prevenir el procesamiento de un valor invalido
-						Long reservaId = Long.parseLong(Busqueda.this.txtBuscar.getText());
+						Long reservaId = Long.parseLong(View.this.txtBuscar.getText());
 						try {//Informar busqueda fallida
-							Reserva reserva = Busqueda.this.reservationController.findBy(reservaId);
-							Busqueda.this.modelo.setRowCount(0);
-							Busqueda.this.cargarReserva(reserva);
+							Reserva reserva = View.this.reservationController.findBy(reservaId);
+							View.this.modelo.setRowCount(0);
+							View.this.cargarReserva(reserva);
 						} catch(NoResultException ex) {
-							Comunicador.informarReservaNoEncontrada(Busqueda.this);
+							Comunicador.informarReservaNoEncontrada(View.this);
 						}
 					} catch(NumberFormatException ex) {
-						Comunicador.informarNumeroInvalido(Busqueda.this);
+						Comunicador.informarNumeroInvalido(View.this);
 					}
 				} else {
-					String apellido = Busqueda.this.txtBuscar.getText();
+					String apellido = View.this.txtBuscar.getText();
 					List<Huesped> huespedes = guestController.buscarPorApellido(apellido);
-					Busqueda.this.modeloHuesped.setRowCount(0);
-					Busqueda.this.cargarHuespedes(huespedes);
+					View.this.modeloHuesped.setRowCount(0);
+					View.this.cargarHuespedes(huespedes);
 				}
 			}
 		});
@@ -294,13 +297,13 @@ public class Busqueda extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent args) {
 				App.iniciarTransaccion();
-				if(Busqueda.this.reservaEsLaPestañaActiva()) {
-					Busqueda.this.reservationController.updateFromTable(tbReservas);
+				if(View.this.reservaEsLaPestañaActiva()) {
+					View.this.reservationController.updateFromTable(tbReservas);
 				} else {
-					Busqueda.this.guestController.updateFromTable(tbHuespedes);
+					View.this.guestController.updateFromTable(tbHuespedes);
 				}
 				App.confirmarTransaccion();
-				Comunicador.informarModificacionExitosa(Busqueda.this);
+				Comunicador.informarModificacionExitosa(View.this);
 			}
 		});
 		btnEditar.setLayout(null);
@@ -331,30 +334,30 @@ public class Busqueda extends JFrame {
 				Reserva reservation = null;
 				Huesped guest = null;
 
-				if(Busqueda.this.reservaEsLaPestañaActiva()) {
-					reservation = Busqueda.this.reservationController.findIn(tbReservas);
-					guest = Busqueda.this.guestController.findBy(reservation);
+				if(View.this.reservaEsLaPestañaActiva()) {
+					reservation = View.this.reservationController.findIn(tbReservas);
+					guest = View.this.guestController.findBy(reservation);
 				} else {
-					guest = Busqueda.this.guestController.findIn(tbHuespedes);
+					guest = View.this.guestController.findIn(tbHuespedes);
 					reservation = guest.getReserva();
 				}
 
 				guest.setReserva(null);//Deshasociar la reserva del huesped
 
 				//Eliminar de la base de datos la reserva y el huesped
-				Busqueda.this.reservationController.remover(reservation);
-				Busqueda.this.guestController.remover(guest);
+				View.this.reservationController.remover(reservation);
+				View.this.guestController.remover(guest);
 
 				//Actualizar la interfaz de la tabla
-				Busqueda.this.modelo.setRowCount(0);
-				Busqueda.this.modeloHuesped.setRowCount(0);
-				Busqueda.this.cargarHuespedes();
-				Busqueda.this.cargarReservas();
+				View.this.modelo.setRowCount(0);
+				View.this.modeloHuesped.setRowCount(0);
+				View.this.cargarHuespedes();
+				View.this.cargarReservas();
 
 				App.confirmarTransaccion();
 
 				//Informar de la eliminación del registro
-				Comunicador.informarEliminacionExistosa(Busqueda.this);
+				Comunicador.informarEliminacionExistosa(View.this);
 			}
 		});
 		
