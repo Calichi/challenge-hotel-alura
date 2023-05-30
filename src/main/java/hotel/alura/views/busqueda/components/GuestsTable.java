@@ -2,7 +2,11 @@ package hotel.alura.views.busqueda.components;
 
 import javax.swing.table.DefaultTableModel;
 
-public class GuestsTable extends BaseTable {
+import hotel.alura.modelo.GuestDataSchema;
+
+//DTO para tabla de huespedes
+public class GuestsTable
+					extends BaseTable {
 
   @Override
   void defineDataSchema(DefaultTableModel model) {
@@ -14,5 +18,20 @@ public class GuestsTable extends BaseTable {
 		model.addColumn("Telefono");
 		model.addColumn("Número de Reserva");
   }
+
+	@Override
+	public GuestDataSchema getDataFrom(DefaultTableModel model, int row) {
+		return new GuestRow(model, row);
+	}
+
+	@Override
+	public GuestDataSchema getDataFrom(int row) {
+		return (GuestDataSchema)super.getDataFrom(row);
+	}
+
+	@Override
+	public GuestDataSchema getDataFromSelectedRow() {
+		 return (GuestDataSchema)super.getDataFromSelectedRow();
+	}
 
 }

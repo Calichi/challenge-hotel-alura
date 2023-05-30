@@ -16,7 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
@@ -41,8 +40,8 @@ public class View extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField txtBuscar;
-	private JTable tbHuespedes;
-	private JTable tbReservas;
+	private GuestsTable tbHuespedes;
+	private ReservationsTable tbReservas;
 	private DefaultTableModel modelo;
 	private DefaultTableModel modeloHuesped;
 	private JLabel labelAtras;
@@ -281,9 +280,9 @@ public class View extends JFrame {
 			public void mouseClicked(MouseEvent args) {
 				App.iniciarTransaccion();
 				if(View.this.reservaEsLaPestañaActiva()) {
-					View.this.reservationController.updateFromTable(tbReservas);
+					View.this.reservationController.updateFrom(tbReservas.getDataFromSelectedRow());
 				} else {
-					View.this.guestController.updateFromTable(tbHuespedes);
+					View.this.guestController.updateFrom(tbHuespedes.getDataFromSelectedRow());
 				}
 				App.confirmarTransaccion();
 				Comunicador.informarModificacionExitosa(View.this);

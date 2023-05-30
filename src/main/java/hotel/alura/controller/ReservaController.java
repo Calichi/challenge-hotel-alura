@@ -1,15 +1,13 @@
 package hotel.alura.controller;
 
-import java.math.BigDecimal;
-import java.sql.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.swing.JTable;
-import javax.swing.table.TableModel;
 
 import hotel.alura.dao.ReservaDao;
 import hotel.alura.modelo.Reserva;
+import hotel.alura.modelo.ReservationDataSchema;
 
 public class ReservaController extends BaseController {
 
@@ -36,23 +34,12 @@ public class ReservaController extends BaseController {
     return findBy(id);
   }
 
-  public void updateFromTable(JTable table) {
-    int rowIndex = table.getSelectedRow();
-    TableModel model = table.getModel();
-
-    //Extraer los datos de la tabla
-    long id = (Long)model.getValueAt(rowIndex, 0);
-    Date fechaDeEntrada = Date.valueOf(model.getValueAt(rowIndex, 1).toString());
-    Date fechaDeSalida = Date.valueOf(model.getValueAt(rowIndex, 2).toString());
-    BigDecimal costo = new BigDecimal(model.getValueAt(rowIndex, 3).toString());
-    String formaDePago = model.getValueAt(rowIndex, 4).toString();
-
-    //Recuperar la entidad y actualizar sus datos
-    Reserva reservation = findBy(id);
-    reservation.setEntrada(fechaDeEntrada);
-    reservation.setSalida(fechaDeSalida);
-    reservation.setCosto(costo);
-    reservation.setFormaDePago(formaDePago);
+  public void updateFrom(ReservationDataSchema data) {
+    Reserva reservation = this.findBy(data.getId());
+    reservation.setEntrada(data.getEntryDate());
+    reservation.setSalida(data.getDepartureDate());
+    reservation.setCosto(data.getCost());
+    reservation.setFormaDePago(data.getPaymentMethod());
   }
 
   public void remover(Reserva reservation) {
