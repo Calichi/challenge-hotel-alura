@@ -1,9 +1,24 @@
 package hotel.alura.views.busqueda;
 
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.util.List;
+
+import javax.persistence.NoResultException;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -18,24 +33,8 @@ import hotel.alura.modelo.RowDataProvider;
 import hotel.alura.views.Comunicador;
 import hotel.alura.views.MenuUsuario;
 import hotel.alura.views.busqueda.components.GuestsTable;
-
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.persistence.NoResultException;
-import javax.swing.ImageIcon;
-import java.awt.Color;
-import javax.swing.JLabel;
-
-import java.awt.Font;
-import javax.swing.JTabbedPane;
-import java.awt.Toolkit;
-import javax.swing.SwingConstants;
-import javax.swing.JSeparator;
-import javax.swing.ListSelectionModel;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.util.List;
+import hotel.alura.views.busqueda.components.ReservationsTable;
+import hotel.alura.views.resources.Image;
 
 @SuppressWarnings("serial")
 public class View extends JFrame {
@@ -74,7 +73,7 @@ public class View extends JFrame {
 	 * Create the frame.
 	 */
 	public View() {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(View.class.getResource("./../../imagenes/lupa2.png")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Image.LUPA2_URL));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 910, 571);
 		contentPane = new JPanel();
@@ -133,38 +132,22 @@ public class View extends JFrame {
 		tpTablas.setBounds(20, 169, 865, 328);
 		contentPane.add(tpTablas);
 		
-		tbReservas = new JTable();
-		tbReservas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tbReservas.setFont(new Font("Roboto", Font.PLAIN, 16));
+		tbReservas = new ReservationsTable();
 		modelo = (DefaultTableModel) tbReservas.getModel();
-		modelo.addColumn("Numero de Reserva");
-		modelo.addColumn("Fecha Check In");
-		modelo.addColumn("Fecha Check Out");
-		modelo.addColumn("Valor");
-		modelo.addColumn("Forma de Pago");
 		cargarReservas();
 		JScrollPane scroll_table = new JScrollPane(tbReservas);
-		tpTablas.addTab(Reserva.TITULO, new ImageIcon(View.class.getResource("./../../imagenes/reservado.png")), scroll_table, null);
+		tpTablas.addTab(Reserva.TITULO, Image.RESERVATIONS, scroll_table, null);
 		scroll_table.setVisible(true);
 		
 		tbHuespedes = new GuestsTable();
 		modeloHuesped = (DefaultTableModel) tbHuespedes.getModel();
-		/*tbHuespedes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tbHuespedes.setFont(new Font("Roboto", Font.PLAIN, 16));*/
-		/*modeloHuesped.addColumn("Número de Huesped");
-		modeloHuesped.addColumn("Nombre");
-		modeloHuesped.addColumn("Apellido");
-		modeloHuesped.addColumn("Fecha de Nacimiento");
-		modeloHuesped.addColumn("Nacionalidad");
-		modeloHuesped.addColumn("Telefono");
-		modeloHuesped.addColumn("Número de Reserva");*/
 		cargarHuespedes(guestController.listar());
 		JScrollPane scroll_tableHuespedes = new JScrollPane(tbHuespedes);
-		tpTablas.addTab(Huesped.TITULO, new ImageIcon(View.class.getResource("./../../imagenes/pessoas.png")), scroll_tableHuespedes, null);
+		tpTablas.addTab(Huesped.TITULO, Image.GUESTS, scroll_tableHuespedes, null);
 		scroll_tableHuespedes.setVisible(true);
 		
 		JLabel lblNewLabel_2 = new JLabel("");
-		lblNewLabel_2.setIcon(new ImageIcon(View.class.getResource("./../../imagenes/Ha-100px.png")));
+		lblNewLabel_2.setIcon(Image.LOGO_100PX);
 		lblNewLabel_2.setBounds(56, 51, 104, 107);
 		contentPane.add(lblNewLabel_2);
 		
